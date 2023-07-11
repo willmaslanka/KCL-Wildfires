@@ -304,9 +304,9 @@ def plotting_FRP(rel_orb_df, north, east, west, south, pickle_lake, red_lake, ra
     cbar.set_label(label = '$log_{10}(frp)$', 
                   size = 14, weight = 'bold')
 
-    ax.add_feature(cf.BORDERS, linestyle=':')
+    ax.add_feature(cf.BORDERS)
     ax.add_feature(cf.COASTLINE)
-    ax.add_feature(cf.STATES, linestyle='-.')
+    ax.add_feature(cf.STATES, linestyle=':')
     ax.add_feature(cf.LAKES, alpha=0.5)
     ax.set_facecolor("gainsboro")
 
@@ -673,10 +673,10 @@ def file_downloader(un_time, un, sat, clip_df, sat_pre):
 
 def plotting_FCC(north, east, west, south, ilon, ilat, rgbStretched, colorTuple, rel_orb_df, pickle_lake, red_lake,file_id, Red, Green, Blue, plot_dir, sat_pre):
 
-    dist = dist_det(north, east, west, south)
+    #dist = dist_det(north, east, west, south)
 
     fig, ax = plt.subplots(figsize=(15,10), subplot_kw={"projection": ccrs.Mercator()})
-    ax.set_extent([west-dist, east+dist, south-dist, north+dist], crs=ccrs.PlateCarree())
+    ax.set_extent([np.floor(west*2)/2, np.ceil(east*2)/2, np.floor(south*2)/2, np.ceil(north*2)/2], crs=ccrs.PlateCarree())
     plt.pcolormesh(ilon, ilat, rgbStretched[:,:,0], color = colorTuple, transform=ccrs.PlateCarree())#, linewidth=0)
     sca = plt.scatter(rel_orb_df.longitude.values, rel_orb_df.latitude.values,
                       s=5,
@@ -703,7 +703,8 @@ def plotting_FCC(north, east, west, south, ilon, ilat, rgbStretched, colorTuple,
                   size = 14, weight = 'bold')
     ax.add_feature(cf.BORDERS, edgecolor='cyan')
     ax.add_feature(cf.COASTLINE, edgecolor='cyan')
-    ax.add_feature(cf.STATES, edgecolor='cyan')
+    ax.add_feature(cf.STATES, linestyle=':', edgecolor='cyan')
+    ax.add_feature(cf.LAKES, alpha=0.5)
     ax.set_facecolor("gainsboro")
     ax.set_title(f'\n{file_id} - {Red}/{Green}/{Blue}')
 
@@ -717,12 +718,12 @@ def plotting_FCC(north, east, west, south, ilon, ilat, rgbStretched, colorTuple,
         )
     gl.top_labels = False
     gl.right_labels = False
-    gl.xlocator = mticker.FixedLocator(np.arange(np.floor(west*2)/2-dist,
-                                                 np.ceil(east*2)/2+(dist*2),
-                                                 ((np.ceil(east*2)/2+dist) - (np.floor(west*2)/2-(dist*2)))/5))
-    gl.ylocator = mticker.FixedLocator(np.arange(np.floor(south*2)/2-dist,
-                                                 np.ceil(north*2)/2+(dist*2),
-                                                 ((np.ceil(north*2)/2+dist) - (np.floor(south*2)/2-(dist*2)))/5))
+    gl.xlocator = mticker.FixedLocator(np.arange(np.floor(west*2)/2,
+                                                 np.ceil(east*2)/2,
+                                                 ((np.ceil(east*2)/2) - (np.floor(west*2)/2))/5))
+    gl.ylocator = mticker.FixedLocator(np.arange(np.floor(south*2)/2,
+                                                 np.ceil(north*2)/2,
+                                                 ((np.ceil(north*2)/2) - (np.floor(south*2)/2))/5))
     
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
