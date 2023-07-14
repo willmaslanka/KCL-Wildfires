@@ -381,7 +381,7 @@ def get_Atmostrans_VIIRS(vangle,water_vapour):
     vangle : float
         Satellite View Angle.
     water_vapour : float
-        Water vapour in XX units.
+        Water vapour in kg /m2 units.
 
     Returns
     -------
@@ -413,7 +413,7 @@ def get_Atmostrans_MODIS(vangle, water_vapour):
     vangle : float
         Satellite View Angle.
     water_vapour : float
-        Water vapour in XX units.
+        Water vapour in kg /m2 units.
 
     Returns
     -------
