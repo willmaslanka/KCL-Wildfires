@@ -262,7 +262,7 @@ def plotting(rel_orb_df, north, east, west, south, pickle_lake, red_lake, srt, e
     end_acq = ACQ_datetime(end, sat)
     
     
-    plt.savefig(f"{plot_dir}{sat}_{srt_acq.split('.')[0]}_{srt_acq.split('.')[1]}_{end_acq.split('.')[1]}_FRP.png",
+    plt.savefig(f"{plot_dir}{srt_acq.split('.')[0]}_{srt_acq.split('.')[1]}_{end_acq.split('.')[1]}_{sat}_FRP.png",
                 bbox_inches='tight', dpi=300, pad_inches = 0)
     plt.close()
     
@@ -358,7 +358,7 @@ if __name__ == "__main__":
     south = 41.66
     day_range = 4
     daynight = 'D' # 'D'/'N'
-    sat = 'SNPP' # 'AQUA' / 'MODIS' / 'SNPP' / 'NOAA-20'
+    sat = 'TERRA' # 'AQUA' / 'TERRA' / 'SNPP' / 'NOAA-20'
     pickle_lake = [-90.18333, 51.466667]
     red_lake = [-93.793056, 51.0679222]
     
