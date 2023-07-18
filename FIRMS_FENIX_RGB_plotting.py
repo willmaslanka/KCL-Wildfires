@@ -781,22 +781,22 @@ def MODIS_Geolocation(GEO_FILE_NAME):
     return latitude, longitude
 
 #%% User Derived Varaibles
-token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJBUFMgT0F1dGgyIEF1dGhlbnRpY2F0b3IiLCJpYXQiOjE2ODcyNjQ4NzMsIm5iZiI6MTY4NzI2NDg3MywiZXhwIjoxNzAyODE2ODczLCJ1aWQiOiJ3bWFzbGFua2EiLCJlbWFpbF9hZGRyZXNzIjoid2lsbGlhbS5tYXNsYW5rYUBrY2wuYWMudWsiLCJ0b2tlbkNyZWF0b3IiOiJ3bWFzbGFua2EifQ.SpghatLJR5t7s14Fw93sVT-HGLcLWceQvDS1HPc93Gc'
+token = 'eyJ0eXAiOiJKV1QiLCJvcmlnaW4iOiJFYXJ0aGRhdGEgTG9naW4iLCJzaWciOiJlZGxqd3RwdWJrZXlfb3BzIiwiYWxnIjoiUlMyNTYifQ.eyJ0eXBlIjoiVXNlciIsInVpZCI6IndtYXNsYW5rYSIsImV4cCI6MTY5NDc3NTIzOCwiaWF0IjoxNjg5NTkxMjM4LCJpc3MiOiJFYXJ0aGRhdGEgTG9naW4ifQ.uQeikIaoQBQdCrGWDRsQZ81wlk2q9ka2WDTSR8hB-_1U4M8xIKjBKbssV2nPFZzZipLWKG9cHCkx5TvDpIcqSMZqUMZEZ_LogIW9XOHVtGQMr0EjpfQD61u23-RFjLX6dyzx_yOhQlNVABbi_L61wTWHKInjYIM05Oi9RMOEU6XaLcciaYxHG9I1tB2YX2HKk1Fx2UJ5gKfJt0uDmb4cKIjlNSuMvMFU-aTvw6VGxNh2w59QHWd2lC5R6uWAbXR34UDt19-zFPbIBfo4tWVaUx3SPORTRiXZwbjJDXSjtIxE575pcMMVnGlcP8LLXKhHcS05D3cMnQHVFqlJhE7Agg'
 save_dir = 'C:/Users/k2262276/Documents/FENIX_SAT/'
 plot_dir = 'C:/Users/k2262276/Documents/FENIX_Plot/'
 
-north = -15.6097033
-south = -22.4241096
+north = 56.86
+east = -74.34
+west = -95.16
+south = 41.66
 
-west = 25.2373
-east = 33.0683413
 daynight = 'D' # 'D'/'N'
-day_range = 2
+day_range = 3
 pickle_lake = [-90.18333, 51.466667]
 red_lake = [-93.793056, 51.0679222]
 radius = 0.1 # km 
 
-sat_all = ['NOAA-20']#['TERRA', 'AQUA', 'SNPP', 'NOAA-20']
+sat_all = ['SNPP']#['TERRA', 'AQUA', 'SNPP', 'NOAA-20']
 
 for sat in sat_all:
     Red, Green, Blue = RGB_Bands(sat)
@@ -822,7 +822,7 @@ for sat in sat_all:
         end = np.datetime64(un[[i for i, j in enumerate(rel_orb) if j == ro_val]].max(),'m')
     
         rel_orb_df = clip_df[clip_df['acq_datetime'].isin(un[[i for i, j in enumerate(rel_orb) if j == ro_val]])]        
-        plotting_FRP(rel_orb_df, north, east, west, south, pickle_lake, red_lake, radius, srt, end, sat, plot_dir) 
+        #plotting_FRP(rel_orb_df, north, east, west, south, pickle_lake, red_lake, radius, srt, end, sat, plot_dir) 
     
     
     #%% Downloading and Plotting the Colour Composite
