@@ -358,7 +358,7 @@ if __name__ == "__main__":
     south = 41.66
     day_range = 4
     daynight = 'D' # 'D'/'N'
-    sat = 'TERRA' # 'AQUA' / 'TERRA' / 'SNPP' / 'NOAA-20'
+    sat = 'NOAA-20' # 'AQUA' / 'TERRA' / 'SNPP' / 'NOAA-20'
     pickle_lake = [-90.18333, 51.466667]
     red_lake = [-93.793056, 51.0679222]
     
