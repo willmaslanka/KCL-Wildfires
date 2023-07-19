@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jul  6 09:30:34 2023
+@author: Will Maslanka
 
-@author: k2262276
 """
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -13,14 +13,22 @@ from cartopy.mpl.ticker import LatitudeFormatter, LongitudeFormatter
 import matplotlib.ticker as mticker
 import numpy as np
 import warnings
-from datetime import date
+from datetime import date, datetime
+from cartopy.geodesic import Geodesic
 
 #%%
 warnings.filterwarnings('ignore')
 plt.close('all')
 
 #%%
-def data_retrieve(sat, north, east, west, south, daynight, day_range):
+def tens_str(num):
+    if int(num) >= 10:
+        num_str = str(num)
+    else:
+        num_str = '0'+str(num)
+    return num_str
+
+def data_retrieve(sat, north, east, west, south, daynight, day_range, date_want):
     """
     Downloads FIRMS NRT FRP data via api.
 
@@ -55,8 +63,18 @@ def data_retrieve(sat, north, east, west, south, daynight, day_range):
         sat_url = "/VIIRS_NOAA20_NRT/"
     elif sat.upper() == 'AQUA' or sat.upper() == 'TERRA':
         sat_url = "/MODIS_NRT/"
-
-    fname = f"{url}{api}{sat_url}{np.floor(west)},{np.floor(south)},{np.ceil(east)},{np.ceil(north)}/{day_range}"
+    elif sat.upper() == 'LANDSAT':
+        sat_url = "/LANDSAT_NRT/"
+    
+    # If datetime.now is used to get time, then remove date_url from url
+    # FIRMS doesn't like it for some reason
+    if f"{datetime.now().year}-{tens_str(datetime.now().month)}-{tens_str(datetime.now().day)}" != f"{date_want.year}-{tens_str(date_want.month)}-{tens_str(date_want.day)}":
+        date_url = f"{date_want.year}-{tens_str(date_want.month)}-{tens_str(date_want.day)}"    
+    else:
+        date_url = ""
+    
+        
+    fname = f"{url}{api}{sat_url}{np.floor(west)},{np.floor(south)},{np.ceil(east)},{np.ceil(north)}/{day_range}/{date_url}"
 
     df = pd.read_csv(fname)
     
@@ -64,6 +82,11 @@ def data_retrieve(sat, north, east, west, south, daynight, day_range):
     if sat.upper() == 'AQUA' or sat.upper() == 'TERRA':
         df = df[df['satellite'] == sat.title()]
     
+    # If LANDSAT, add column of FRP values = 10 (no FRP on LANDSAT data)
+    if sat.upper() == 'LANDSAT':
+        df['frp'] = 10
+    
+    # Get Day/Night ID
     if daynight.upper() == 'D' or daynight.upper() == 'DAY':
         dayid = 'D'
     elif daynight.upper() == 'N' or daynight.upper() == 'NIGHT':
@@ -134,6 +157,12 @@ def datetime_df(full_df):
     mask_df['acq_datetime'] = pd.to_datetime(mask_df[['year','month','day','hour','minute']])
     return mask_df
 
+def circle_calc(pickle_lake, radius=200):
+    gd = Geodesic()
+    cp = gd.circle(lon=pickle_lake[0], lat=pickle_lake[1], radius = radius*1e3)
+    cp = np.vstack((cp, cp[0,:]))
+    return cp
+
 def unique_orbit(clip_df):
     """
     Calculates which FRP data is associated with a common orbit (done via time
@@ -200,11 +229,26 @@ def plotting(rel_orb_df, north, east, west, south, pickle_lake, red_lake, srt, e
     None.
 
     """
-    dist = dist_det(north, east, west, south)
 
+    # Calculate Circles with km radius
+    cp250 = circle_calc(pickle_lake, 250)
+    cp200 = circle_calc(pickle_lake, 200)
+    cp150 = circle_calc(pickle_lake, 150)
+    cp100 = circle_calc(pickle_lake, 100)
+    cp050 = circle_calc(pickle_lake, 50)
+    
+    # Add Offset to latitude (Calculates latitudes ~ 2.5km south of where it should be)
+    cp250[:,1] += (cp250[44,1] - pickle_lake[1])
+    cp200[:,1] += (cp250[44,1] - pickle_lake[1])
+    cp150[:,1] += (cp250[44,1] - pickle_lake[1])
+    cp100[:,1] += (cp250[44,1] - pickle_lake[1])
+    cp050[:,1] += (cp250[44,1] - pickle_lake[1])
+
+
+    # Plotting
     fig, ax = plt.subplots(figsize=(15,10),
                            subplot_kw={"projection": ccrs.Mercator()})
-    ax.set_extent([west-dist, east+dist, south-dist, north+dist],
+    ax.set_extent([cp250[:,0].min()-0.1, cp250[:,0].max()+0.1, cp250[:,1].min()-0.1, cp250[:,1].max()+0.1],
                   crs=ccrs.PlateCarree())
     sca = plt.scatter(rel_orb_df.longitude.values, rel_orb_df.latitude.values,
                       s=5,
@@ -213,18 +257,103 @@ def plotting(rel_orb_df, north, east, west, south, pickle_lake, red_lake, srt, e
                       vmax = 3,
                       cmap="hot",
                       transform=ccrs.PlateCarree(),
-                      zorder = 2)
+                      zorder = 10)
+    
     plt.scatter(pickle_lake[0], pickle_lake[1],
                 marker='X',
                 c='dodgerblue',
                 transform=ccrs.PlateCarree(),
-                zorder = 1)
-    plt.scatter(red_lake[0], red_lake[1],
-                marker='*',
-                c='darkviolet',
-                transform=ccrs.PlateCarree(),
-                zorder = 1)
+                zorder = 10)
     
+    # Plotting radius circles        
+    plt.plot(cp250[:,0], cp250[:,1],
+             transform=ccrs.PlateCarree(),
+             color='darkslategrey',
+             zorder = 0)
+    
+    plt.plot(cp200[:,0], cp200[:,1],
+             transform=ccrs.PlateCarree(),
+             color='darkslategrey',
+             zorder = 0)
+    
+    plt.plot(cp150[:,0], cp150[:,1],
+             transform=ccrs.PlateCarree(),
+             color='darkslategrey',
+             zorder = 0)
+    
+    plt.plot(cp100[:,0], cp100[:,1],
+             transform=ccrs.PlateCarree(),
+             color='darkslategrey',
+             zorder = 0)
+    
+    plt.plot(cp050[:,0], cp050[:,1],
+             transform=ccrs.PlateCarree(),
+             color='darkslategrey',
+             zorder = 0)
+    
+    # Plotting Bearings
+    plt.plot([cp250[0,0], cp250[90,0]],[cp250[0,1], cp250[90,1]],
+             transform=ccrs.PlateCarree(),
+             color='darkslategrey',
+             zorder = 0)
+    
+    plt.plot([cp250[165,0], cp250[75,0]],[cp250[165,1], cp250[75,1]],
+             transform=ccrs.PlateCarree(),
+             color='darkslategrey',
+             zorder = 0)
+    
+    plt.plot([cp250[150,0], cp250[60,0]],[cp250[150,1], cp250[60,1]],
+             transform=ccrs.PlateCarree(),
+             color='darkslategrey',
+             zorder = 0)
+    
+    plt.plot([cp250[135,0], cp250[45,0]],[cp250[135,1], cp250[45,1]],
+             transform=ccrs.PlateCarree(),
+             color='darkslategrey',
+             zorder = 0)
+    
+    plt.plot([cp250[120,0], cp250[30,0]],[cp250[120,1], cp250[30,1]],
+             transform=ccrs.PlateCarree(),
+             color='darkslategrey',
+             zorder = 0)
+    
+    plt.plot([cp250[105,0], cp250[15,0]],[cp250[105,1], cp250[15,1]],
+             transform=ccrs.PlateCarree(),
+             color='darkslategrey',
+             zorder = 0)
+    
+    # Labels for circles
+    ax.text(pickle_lake[0], cp250[:,1].min(), '250km',
+            transform=ccrs.PlateCarree(),
+            fontsize=12,
+            verticalalignment='top',
+            horizontalalignment='center')
+    
+    ax.text(pickle_lake[0], cp200[:,1].min(), '200km',
+            transform=ccrs.PlateCarree(),
+            fontsize=12,
+            verticalalignment='top',
+            horizontalalignment='center')
+    
+    ax.text(pickle_lake[0], cp150[:,1].min(), '150km',
+            transform=ccrs.PlateCarree(),
+            fontsize=12,
+            verticalalignment='top',
+            horizontalalignment='center')
+    
+    ax.text(pickle_lake[0], cp100[:,1].min(), '100km',
+            transform=ccrs.PlateCarree(),
+            fontsize=12,
+            verticalalignment='top',
+            horizontalalignment='center')
+    
+    ax.text(pickle_lake[0], cp050[:,1].min(), '50km',
+            transform=ccrs.PlateCarree(),
+            fontsize=12,
+            verticalalignment='top',
+            horizontalalignment='center')
+    
+    # Colorbar
     cbar = plt.colorbar(sca)
     cbar.set_label(label = '$log_{10}(frp)$', 
                   size = 14, weight = 'bold')
@@ -232,7 +361,7 @@ def plotting(rel_orb_df, north, east, west, south, pickle_lake, red_lake, srt, e
     ax.add_feature(cf.BORDERS, edgecolor='black')
     ax.add_feature(cf.COASTLINE, edgecolor='black')
     ax.add_feature(cf.STATES, edgecolor='black')
-    ax.set_facecolor("gainsboro")
+    #ax.set_facecolor("gainsboro")
 
     gl = ax.gridlines(
         crs=ccrs.PlateCarree(),
@@ -244,8 +373,8 @@ def plotting(rel_orb_df, north, east, west, south, pickle_lake, red_lake, srt, e
         )
     gl.top_labels = False
     gl.right_labels = False
-    gl.xlocator = mticker.FixedLocator(np.arange(-95, -70, 2.5))
-    gl.ylocator = mticker.FixedLocator(np.arange(40, 60, 2.5))
+    gl.xlocator = mticker.FixedLocator(np.arange(-95, -70, 1))
+    gl.ylocator = mticker.FixedLocator(np.arange(40, 60, 1))
     
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
@@ -265,6 +394,12 @@ def plotting(rel_orb_df, north, east, west, south, pickle_lake, red_lake, srt, e
     plt.savefig(f"{plot_dir}{srt_acq.split('.')[0]}_{srt_acq.split('.')[1]}_{end_acq.split('.')[1]}_{sat}_FRP.png",
                 bbox_inches='tight', dpi=300, pad_inches = 0)
     plt.close()
+    
+def lat_lon_angle(lon, lat, radius, deg):
+    new_lon = lon + np.sin(np.radians(deg))*radius
+    new_lat = lat + np.cos(np.radians(deg))*radius
+    
+    return new_lon, new_lat
     
 def dist_det(north, east, west, south):
     """
@@ -347,23 +482,30 @@ def doy_finder(yr, mn, dy):
     doy = date(int(yr), int(mn), int(dy)).timetuple().tm_yday
     return doy
 
+def extent_latlon(lon, lat):
+    north = lat+5
+    south = lat-5
+    east = lon+5
+    west = lon-5
+    
+    return north, south, east, west
+
 #%%
 if __name__ == "__main__":
     save_dir = 'C:/Users/k2262276/Documents/FENIX_SAT/'
     plot_dir = 'C:/Users/k2262276/Documents/FENIX_Plot/'
     
-    north = 56.86
-    east = -74.34
-    west = -95.16
-    south = 41.66
-    day_range = 4
+    day_range = 7
     daynight = 'D' # 'D'/'N'
-    sat = 'NOAA-20' # 'AQUA' / 'TERRA' / 'SNPP' / 'NOAA-20'
+    sat = 'SNPP' # 'AQUA' / 'TERRA' / 'SNPP' / 'NOAA-20' / 'LANDSAT'
     pickle_lake = [-90.18333, 51.466667]
     red_lake = [-93.793056, 51.0679222]
+    date_want = datetime.now() #datetime(2023,6,28)
+
+    north, south, east, west = extent_latlon(pickle_lake[0], pickle_lake[1])
     
     #%%
-    df = data_retrieve(sat, north, east, west, south, daynight, day_range)   
+    df = data_retrieve(sat, north, east, west, south, daynight, day_range, date_want)   
     clip_df = clipping_df(df)    
     rel_orb, un = unique_orbit(clip_df)
     
