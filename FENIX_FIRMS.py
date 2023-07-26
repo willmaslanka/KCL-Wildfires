@@ -378,7 +378,7 @@ if __name__ == "__main__":
     daynight = 'D' # 'D'/'N'
     satellites = ['NOAA-20', 'SNPP','AQUA','TERRA','LANDSAT'] # 'AQUA' / 'TERRA' / 'SNPP' / 'NOAA-20' / 'LANDSAT'
     pickle_lake = [-90.18333, 51.466667] # Longitude, Latitude
-    date_want = datetime(2023,6,28) # datetime.now() 
+    date_want = datetime.now() #datetime(2023,6,28) # datetime.now() 
     
     #%% FIRMS Scraping and Plotting
     for sat in satellites:
