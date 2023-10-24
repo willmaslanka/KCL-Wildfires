@@ -217,7 +217,7 @@ def tropomi_download_files(products, save_path):
         print('\nDownload was interrupted by user.')
         
 ######## LAADS Download ######## 
-def Product_download(collection, product, year, doy, start_time, end_time, ext, save_dir, token):
+def LAADS_Product_download(collection, product, year, doy, start_time, end_time, ext, save_dir, token):
     """JPSS Function to download data"""
     master_url = 'http://ladsweb.modaps.eosdis.nasa.gov/archive/allData/'
     search_url = master_url + collection + '/' + product + '/' + year + '/' + doy + '/'
