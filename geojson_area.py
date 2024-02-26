@@ -19,4 +19,4 @@ def plume_area_calc(fname: str) -> float:
         gj = geojson.load(f)
     return area(gj['features'][0]['geometry'])
 
-val = plume_area_calc(fname)
+area_sq_m = plume_area_calc(fname)
