@@ -119,19 +119,12 @@ def coarsen_array(array, coarseness=5):
     return coarse_array
 
 #%% User Variables
-#latlon_5m_file = 'filepath-to-MOD06'
-#firemask_file = 'filepath-to-MOD14'
+latlon_5m_dir = 'directory-path-to-MOD06'
+firemask_dir = 'directory-path-to-MOD14'
 
-#product = 'MODO6_L2'
-#proxy_save_dir = 'directory-to-save-into'
-#doy = 'day-of-year-value'
-
-latlon_5m_dir = 'C:/Users/k2262276/Documents/DataDownload/CRS_Comparison/MOD07_L2/'
-firemask_dir = 'C:/Users/k2262276/Documents/DataDownload/CRS_Comparison/MOD14/'
-
-product = 'MOD07_L2'
-proxy_save_dir = 'C:/Users/k2262276/Documents/DataDownload/CRS_Comparison/MOD99/'
-doy = '001'
+product = 'MODO6_L2'
+proxy_save_dir = 'directory-to-save-into'
+doy = 'day-of-year-value'
 
 #%% Proxy Product Naming
 if product[1].upper() == 'O':
@@ -141,7 +134,6 @@ else:
     
 #%% Finding all MOD07 files (lat/lon)
 MOD07_file = glob_file_checker(f'{latlon_5m_dir}{doy}/', '*')
-
 
 for latlon_5m_file in MOD07_file: # For every lat/lon file
     time = latlon_5m_file.split(f'{doy}.')[-1].split('.')[0] # Extract Time
