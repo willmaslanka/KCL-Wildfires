@@ -5,7 +5,8 @@ Created on Tue Jul 18 11:36:35 2023
 
 Script for scraping data from University of Wyoming Radiosonde Page
 https://weather.uwyo.edu/upperair/sounding.html
-Plots Skew-T and Hodograph, and saves to file
+
+Plots Skew-T and Hodograph
 
 Main Dependancies - numpy, matplotlib, metpy, siphon
 conda install -c conda-forge siphon
@@ -26,30 +27,41 @@ import warnings
 warnings.filterwarnings('ignore')
 plt.close('all')
 
-plt_dir = 'C:/Users/k2262276/Documents/FENIX_Plot/'
+#%% User Defined Variables
+dt_utc = datetime(2024,10,23,0,0) # Datetime in UTC
+station = '71119' # WMO Station Code
 
-#%%
+# https://www.umr-cnrm.fr/dbfastex/instruments/rsc_dat.html: List of WMO sites
+
+#%% Retrieve Data
+
 # Get most recent datetime (either 00z or 12z)
-dt_nowutc = datetime.utcnow()
-if dt_nowutc.hour < 12 and dt_nowutc.hour != 0:
-    dt_wnt = datetime(dt_nowutc.year,
-                      dt_nowutc.month,
-                      dt_nowutc.day,
+if dt_utc.hour < 12:
+    dt_wnt = datetime(dt_utc.year,
+                      dt_utc.month,
+                      dt_utc.day,
                       0,
                       0)
 else:
-    dt_wnt = datetime(dt_nowutc.year,
-                      dt_nowutc.month,
-                      dt_nowutc.day,
+    dt_wnt = datetime(dt_utc.year,
+                      dt_utc.month,
+                      dt_utc.day,
                       12,
                       0) 
 
-#%% Retrieve Data
-station = 'WPL' # Pickle Lake
-
 # Read remote sounding data based on time (dt) and station
 df = WyomingUpperAir.request_data(dt_wnt, station)
-sounding = pandas_dataframe_to_unit_arrays(df)
+#%% Correct heights
+# Sometimes the heights are reset every time they increase over 10000m.
+# This adds 10000 every time it is reset.
+# Cycles through twice, as it resets at 20000m as well.
+
+for runs in np.arange(2):
+    for i in np.arange(1,len(df)):
+        if df.height[i]-df.height[i-1] < 0:
+            df.height[i] = df.height[i] + 10000
+
+sounding = pandas_dataframe_to_unit_arrays(df) # Adds units to dataframe,
 #%%
 # Setting Values for Mixing Ratio
 w = np.array([0.01, 0.005, 0.003, 
@@ -113,6 +125,12 @@ cb.set_label('mAGL [m]')
 ax.set_xlabel('Knots')
 plt.title('{} Hodograph'.format(station), loc='left')
 
-plt.savefig(f"{plt_dir}{dt_wnt.strftime('%y%m%d%H')}Z_{station}_skewt.png",
-            bbox_inches='tight', dpi=300, pad_inches = 0)
-plt.close()
+# Adding extra information
+plt.annotate(f"WMO Station Number: {sounding['station_number'][0]}",
+             xy=(0.70, 0.525), xycoords='figure fraction')
+plt.annotate(f"Station Latitude: {df['latitude'][0]}{chr(176)}",
+             xy=(0.70, 0.50), xycoords='figure fraction')
+plt.annotate(f"Station Longitude: {df['longitude'][0]}{chr(176)}",
+             xy=(0.70, 0.475), xycoords='figure fraction')
+plt.annotate(f"Station Elevation: {df['elevation'][0]} mASL",
+             xy=(0.70, 0.450), xycoords='figure fraction')
