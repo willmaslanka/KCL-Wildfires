@@ -120,6 +120,7 @@ axs[1].add_feature(cf.COASTLINE, linestyle='-')
 
 plt.colorbar(pcm, ax=axs, orientation='horizontal', 
              label=f"Layer {layer_num} Height above Geiod [m]")
+plt.suptitle(fname.split('/')[-1])
 
 #%%% Plotting the Methane Mixing Ratio
 fig, axs = plt.subplots(1,2, figsize=(15,8), subplot_kw={'projection': ccrs.PlateCarree()})
@@ -135,6 +136,7 @@ axs[1].add_feature(cf.COASTLINE, linestyle='-')
 
 plt.colorbar(pcm, ax=axs, orientation='horizontal',
              label=r"CH4 mixing ratio (bias corrected) [x10$^{-9}$]")
+plt.suptitle(fname.split('/')[-1])
 
 #%%% Plotting the Methane Profile Apriori
 fig, axs = plt.subplots(1,2, figsize=(15,8), subplot_kw={'projection': ccrs.PlateCarree()})
@@ -150,6 +152,7 @@ axs[1].add_feature(cf.COASTLINE, linestyle='-')
 
 plt.colorbar(pcm, ax=axs, orientation='horizontal',
              label=fr"Mole Content of Methane in Layer {layer_num} [mol m$^{-2}$]")
+plt.suptitle(fname.split('/')[-1])
 
 #%%% Plotting the Methane Mass for given layer
 fig, axs = plt.subplots(1,2, figsize=(15,8), subplot_kw={'projection': ccrs.PlateCarree()})
@@ -165,6 +168,7 @@ axs[1].add_feature(cf.COASTLINE, linestyle='-')
 
 plt.colorbar(pcm, ax=axs, orientation='horizontal',
              label=fr"Mass Methane in Layer {layer_num} [g]")
+plt.suptitle(fname.split('/')[-1])
 
 
 
