@@ -47,13 +47,13 @@ def download_data(uri):
 
 #%% User Defined Variables
 # timestamps in UTC to request data for
-start_dt = datetime(2020,10,1,0,0) # start datetime
-end_dt = datetime(2020,10,7,0,0) # end datetime
-station = 'SBSN' # IACO Airport Code
+start_dt = datetime(2024,9,27,0,0) # start datetime
+end_dt = datetime(2024,9,28,0,0) # end datetime
+station = 'CZOL' # IACO Airport Code
 # Codes can be found here: https://www.prokerala.com/travel/airports/
 # Or google
 
-save_dir = 'save-directory-here'
+save_dir = 'C:/Users/k2262276/Documents/Canada_2024/ToUpload/'
 make_directory(save_dir)
 
 # Number of attempts to download data

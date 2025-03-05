@@ -25,17 +25,17 @@ def make_directory(save_dir):
         os.makedirs(save_dir)
 
 #%% User defined variables
-sonde_dir = 'save-directory-here' # replace this directory with save location
-
+#sonde_dir = 'save-directory-here' # replace this directory with save location
+sonde_dir = 'C:/Users/k2262276/Documents/Canada_2024/ToUpload/'
 # If directory doesn't exist, make it so
 make_directory(sonde_dir)
 
-stations = ['71119', '03882'] # list of WMO station codes that you want
+stations = ['71119'] # list of WMO station codes that you want
 # List of codes here: https://www.umr-cnrm.fr/dbfastex/instruments/rsc_dat.html
 # Map of sites here: https://weather.uwyo.edu/upperair/sounding.html
 
-start_dt = datetime(2024,10,1,0,0) # start datetime
-end_dt = datetime(2024,10,7,0,0) # end datetime
+start_dt = datetime(2024,9,27,0,0) # start datetime
+end_dt = datetime(2024,9,28,0,0) # end datetime
 
 #%% Downloading data
 MAX_ATTEMPTS = 2 
@@ -54,7 +54,7 @@ for att_no in range(MAX_ATTEMPTS):
             print(f'..{start_pd}')
             try:
                 df = WyomingUpperAir.request_data(start_pd, station)
-                df.to_csv(f"{stn_dir}{start_pd.strftime('%y%m%d%H')}_radiosonde.csv", index=False)
+                df.to_csv(f"{stn_dir}{start_pd.strftime('%y%m%d%H')}_radiosonde_{station}.csv", index=False)
             except:
                 pass
                     
